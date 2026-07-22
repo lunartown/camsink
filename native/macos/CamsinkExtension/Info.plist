@@ -8,6 +8,6 @@
 		<string>M56H79B979.com.lunartown.camsink</string>
 	</dict>
 	<key>NSSystemExtensionUsageDescription</key>
-	<string></string>
+	<string>Python 앱이 프레임을 보낼 수 있는 camsink 가상 카메라를 설치합니다.</string>
 </dict>
 </plist>

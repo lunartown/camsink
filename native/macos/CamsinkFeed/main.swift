@@ -110,9 +110,16 @@ func findCMIODevice(uid: String) -> CMIOObjectID? {
     for device in devices {
         opa.mSelector = CMIOObjectPropertySelector(kCMIODevicePropertyDeviceUID)
         CMIOObjectGetPropertyDataSize(device, &opa, 0, nil, &dataSize)
-        var deviceUID: CFString = "" as NSString
-        CMIOObjectGetPropertyData(device, &opa, 0, nil, dataSize, &dataUsed, &deviceUID)
-        if String(deviceUID) == uid { return device }
+        let deviceUID = UnsafeMutablePointer<Unmanaged<CFString>?>.allocate(capacity: 1)
+        deviceUID.initialize(to: nil)
+        defer {
+            deviceUID.deinitialize(count: 1)
+            deviceUID.deallocate()
+        }
+        CMIOObjectGetPropertyData(device, &opa, 0, nil, dataSize, &dataUsed, deviceUID)
+        if let value = deviceUID.pointee?.takeUnretainedValue(), String(value) == uid {
+            return device
+        }
     }
     return nil
 }

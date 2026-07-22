@@ -380,7 +380,7 @@
 				DEVELOPMENT_TEAM = M56H79B979;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSCameraUsageDescription = "Sample Camera";
+				INFOPLIST_KEY_NSCameraUsageDescription = "camsink 가상 카메라 설정";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
@@ -411,7 +411,7 @@
 				DEVELOPMENT_TEAM = M56H79B979;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSCameraUsageDescription = "Sample Camera";
+				INFOPLIST_KEY_NSCameraUsageDescription = "camsink 가상 카메라 설정";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
