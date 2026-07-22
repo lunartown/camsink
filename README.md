@@ -1,0 +1,125 @@
+# camsink
+
+Send frames from Python to a **virtual camera on macOS** — no OBS required.
+
+```python
+import cv2
+from camsink import VirtualCamera
+
+cap = cv2.VideoCapture(0)
+with VirtualCamera() as cam:
+    while True:
+        ok, frame = cap.read()
+        if ok:
+            cam.send(cv2.GaussianBlur(frame, (51, 51), 0))
+```
+
+`camsink` then shows up as a camera in Zoom, Google Meet, Teams, Discord, or
+anything else that lists system cameras.
+
+## Why
+
+macOS removed CoreMediaIO DAL plugins. Since macOS 13, a virtual camera must be a
+**Camera Extension** — a system extension embedded in a signed, notarized app.
+That rules out the "just install a driver" approach older tools used.
+
+The practical consequence is that existing Python options are limited:
+
+| | Status |
+|---|---|
+| [pyvirtualcam](https://github.com/letmaik/pyvirtualcam) | Requires OBS Studio to be installed |
+| [akvirtualcamera](https://github.com/webcamoid/akvirtualcamera) | DAL plugin — effectively dead on modern macOS |
+| Camo, NeuralCam, VCam, … | Closed apps; only publish their own video |
+
+camsink ships its own Camera Extension, so nothing else needs to be installed.
+
+## Requirements
+
+- macOS 13 or later (tested on macOS 26, Apple Silicon)
+- Python 3.9+ with `opencv-python`
+
+## Install
+
+> **Status:** there is no prebuilt release yet, so building from source is
+> currently the only path — which means an Apple Developer account is required.
+> Signed, notarized builds that work without one are the whole point of this
+> project and are the next thing planned. See
+> [#1](https://github.com/lunartown/camsink/issues/1).
+
+### Build from source
+
+You need an Apple Developer Program membership. macOS refuses to load system
+extensions that are not signed with a Developer ID and notarized, and the
+development-signing escape hatch (`systemextensionsctl developer on`) requires
+disabling SIP.
+
+```bash
+cp .env.example .env          # fill in your team ID and API key
+pip install pyjwt cryptography requests
+python scripts/provision.py   # registers device, App IDs, capabilities, profiles
+./native/macos/build.sh       # archive, sign, notarize, install
+./native/macos/build-feed.sh  # build the frame-feeding helper
+```
+
+Then open `/Applications/CamsinkApp.app`, click Install, and approve the
+extension in System Settings.
+
+## How it works
+
+```
+your Python code
+   │  BGR frames
+   ▼
+camsink (Python)
+   │  raw BGRA over a pipe
+   ▼
+camsink-feed (Swift helper)
+   │  CMSampleBuffer into the sink stream
+   ▼
+CamsinkExtension (Camera Extension)
+   │
+   ▼
+Zoom / Meet / Teams …
+```
+
+CoreMediaIO sink streams are reachable only through a C API, which is awkward
+to drive from Python. The `camsink-feed` helper exists solely to bridge that
+gap: it reads raw BGRA frames on stdin and enqueues them.
+
+The extension advertises a fixed 1280×720 stream. `VirtualCamera.send()` resizes
+anything that does not match.
+
+## API
+
+```python
+from camsink import VirtualCamera, CamsinkError
+
+cam = VirtualCamera()          # camera_name, width, height are configurable
+cam.start()                    # optional; send() starts it on demand
+cam.send(frame_bgr)            # numpy array, OpenCV BGR
+cam.running                    # bool
+cam.close()
+```
+
+`CamsinkError` is raised when the extension is not installed or enabled; the
+message includes setup instructions.
+
+## Limitations
+
+- macOS only for now. The Windows equivalent would use
+  [`MFCreateVirtualCamera`](https://learn.microsoft.com/en-us/windows/win32/api/mfvirtualcamera);
+  only the helper would need replacing.
+- Fixed 1280×720 output.
+- One producer at a time.
+- Building from source requires a paid Apple Developer account. This is a
+  platform requirement, not a choice.
+
+## Credits
+
+The Camera Extension provider and the sink-stream connection logic are derived
+from [ldenoue/cameraextension](https://github.com/ldenoue/cameraextension)
+(MIT, © 2022 Laurent Denoue). See `NOTICE`.
+
+## License
+
+MIT — see `LICENSE`.

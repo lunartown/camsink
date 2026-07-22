@@ -1,0 +1,9 @@
+camsink includes work derived from:
+
+  ldenoue/cameraextension
+  https://github.com/ldenoue/cameraextension
+  MIT License, Copyright (c) 2022 Laurent Denoue
+
+The Camera Extension provider and the CoreMediaIO sink-stream connection
+logic are based on that project. Its full license text is in
+THIRD-PARTY-LICENSES.

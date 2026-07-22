@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "camsink"
+version = "0.1.0"
+description = "Send frames from Python to a virtual camera on macOS, without OBS"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+authors = [{ name = "lunartown" }]
+keywords = ["virtual camera", "macos", "webcam", "coremediaio", "video"]
+classifiers = [
+    "Operating System :: MacOS :: MacOS X",
+    "Programming Language :: Python :: 3",
+    "Topic :: Multimedia :: Video :: Capture",
+]
+dependencies = ["opencv-python", "numpy"]
+
+[project.urls]
+Homepage = "https://github.com/lunartown/camsink"
+
+[tool.setuptools]
+packages = ["camsink"]
