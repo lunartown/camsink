@@ -41,6 +41,9 @@ step "이전 빌드 정리"
 rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR"
 
+step "프레임 전달 헬퍼 빌드"
+./build-feed.sh | tail -1
+
 step "archive"
 xcodebuild -project camsink.xcodeproj -scheme CamsinkApp -configuration Release \
     -archivePath "$BUILD_DIR/camsink.xcarchive" archive \
@@ -69,6 +72,17 @@ xcodebuild -exportArchive -archivePath "$BUILD_DIR/camsink.xcarchive" \
 
 APP="$BUILD_DIR/export/$APP_NAME"
 
+step "헬퍼를 앱에 넣고 다시 서명"
+# 헬퍼를 앱 안에 넣어 두면 사용자는 앱 설치와 pip install 만 하면 된다.
+# 안쪽부터 서명해야 바깥 번들의 봉인이 유효하다.
+SIGN_ID="Developer ID Application"
+cp bin/camsink-feed "$APP/Contents/MacOS/camsink-feed"
+codesign --force --options runtime --timestamp \
+    --sign "$SIGN_ID" "$APP/Contents/MacOS/camsink-feed"
+codesign --force --options runtime --timestamp \
+    --sign "$SIGN_ID" --entitlements CamsinkApp/CamsinkApp.entitlements "$APP"
+codesign --verify --deep --strict "$APP" && echo "서명 검증 통과"
+
 step "공증 제출 (몇 분 걸립니다)"
 ditto -c -k --keepParent "$APP" "$BUILD_DIR/camsink.zip"
 xcrun notarytool submit "$BUILD_DIR/camsink.zip" \
@@ -86,6 +100,12 @@ step "/Applications 설치"
 osascript -e 'quit app "CamsinkApp"' 2>/dev/null || true
 rm -rf "/Applications/$APP_NAME"
 cp -R "$APP" /Applications/
+
+step "배포용 zip"
+# 공증·스테이플된 앱을 그대로 담는다. 릴리스에 올리면 된다.
+rm -f "$BUILD_DIR/CamsinkApp.zip"
+ditto -c -k --keepParent "$APP" "$BUILD_DIR/CamsinkApp.zip"
+echo "$BUILD_DIR/CamsinkApp.zip"
 
 echo
 echo "설치 완료: /Applications/$APP_NAME"

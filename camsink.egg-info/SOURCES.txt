@@ -1,0 +1,10 @@
+LICENSE
+NOTICE
+README.md
+pyproject.toml
+camsink/__init__.py
+camsink.egg-info/PKG-INFO
+camsink.egg-info/SOURCES.txt
+camsink.egg-info/dependency_links.txt
+camsink.egg-info/requires.txt
+camsink.egg-info/top_level.txt
